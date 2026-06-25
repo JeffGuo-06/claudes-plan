@@ -16,11 +16,13 @@ secret_re='API_KEY|ANTHROPIC_API_KEY|sk-[A-Za-z0-9]{6}|AKIA[0-9A-Z]{8}'
 
 case "$tool" in
   Bash)
+    # Match anywhere in the command so chained / multi-line scripts
+    # (e.g. "cd x && git add . && git commit ...") still trigger.
     case "$cmd" in
-      "git commit"*|*"&& git commit"*|*"; git commit"*) play commit.wav ;;
+      *"git commit"*) play commit.wav ;;
     esac
     case "$cmd" in
-      "git status"*|*"git status"*) play bad_change.wav ;;
+      *"git status"*) play bad_change.wav ;;
     esac
     case "$cmd" in
       *"gh pr "*) play skimming_through_prs_LGTM.wav ;;

@@ -42,6 +42,24 @@ You need one of these audio players on your `PATH` (the plugin auto-detects):
 
 If no player is found, the hooks no-op silently — nothing breaks, you just get no sound.
 
+## Volume
+
+Master volume runs `0.0` (mute) to `1.0` (full). Two ways to set it:
+
+- **`volume.conf`** at the plugin root — edit the number; takes effect on the next
+  sound. (Lines starting with `#` are ignored.)
+- **`CLAUDESPLAN_VOLUME` env var** — overrides the file for the session. Set it in
+  Claude Code's settings `env`, or export it in your shell.
+
+```bash
+export CLAUDESPLAN_VOLUME=0.3   # quieter
+export CLAUDESPLAN_VOLUME=0     # mute
+```
+
+Per-clip volume works on `afplay` (macOS), `paplay`, and `ffplay`. `aplay` and the
+Windows PowerShell fallback have no per-clip control, so they play at system volume
+(but `0` still mutes by skipping playback entirely).
+
 ## Caveats
 
 - **`Here_is_claudes_plan.wav`** relies on the `ExitPlanMode` tool firing a

@@ -1,0 +1,12 @@
+{
+  "name": "claudes-plan",
+  "owner": { "name": "JeffGuo-06" },
+  "description": "Sound effects for your Claude Code dev experience.",
+  "plugins": [
+    {
+      "name": "claudes-plan",
+      "source": "./",
+      "description": "A joke plugin that plays sound effects throughout your Claude Code dev experience."
+    }
+  ]
+}

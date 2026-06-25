@@ -1,5 +1,11 @@
 # claudes-plan 🔊
 
+<p align="center">
+  <img src="assets/splash.png" alt="claudes-plan — another way to listen to CLAUDE'S PLAN" width="420">
+</p>
+
+<p align="center"><em>another way to listen to CLAUDE'S PLAN</em></p>
+
 A joke Claude Code plugin that plays sound effects throughout your dev experience.
 Claude commits? Airhorn. Claude reads your `.env`? Uh oh. You drop into plan mode?
 Ding. It hooks into Claude Code events and plays a `.wav` for each.

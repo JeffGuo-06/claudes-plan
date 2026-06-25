@@ -12,20 +12,7 @@ or add commentary.
 
 *Sound effects for your Claude Code dev experience.*
 
-**Sounds play when…**
-
-| Event | Sound |
-|---|---|
-| Claude runs `git commit` | commit |
-| Claude runs a `gh pr` command | skimming PRs |
-| Claude **creates** a `.md` file | md |
-| Claude touches a `.env` / API-key pattern | api keys |
-| An MCP server tool is called | mcp |
-| The context window compacts | context window |
-| A subagent is launched | orchestration |
-| Your prompt contains "ultrathink" | ultrathink |
-| You enter plan mode | plan mode |
-| Claude presents a finished plan | here's claude's plan |
+The sounds are for you to discover as you work.
 
 **Commands**
 

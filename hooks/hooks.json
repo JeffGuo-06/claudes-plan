@@ -1,12 +1,5 @@
 {
   "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          { "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/scripts/show-banner.sh" }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "hooks": [

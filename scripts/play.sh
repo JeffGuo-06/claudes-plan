@@ -45,12 +45,16 @@ esac
 file="${root}/audio/${sound}"
 [ -f "$file" ] || exit 0
 
-# Resolve master volume: env override -> config file -> default.
+# Resolve master volume, in priority order:
+#   1. CLAUDESPLAN_VOLUME env var (explicit override)
+#   2. user config ~/.config/claudes-plan/volume.conf (written by /claudes-plan:volume)
+#   3. bundled default volume.conf at the plugin root
+#   4. 1.0
+read_vol() { grep -vE '^[[:space:]]*#' "$1" 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)?' | head -1; }
+user_conf="${XDG_CONFIG_HOME:-$HOME/.config}/claudes-plan/volume.conf"
 vol="${CLAUDESPLAN_VOLUME:-}"
-if [ -z "$vol" ]; then
-  vol=$(grep -vE '^[[:space:]]*#' "${root}/volume.conf" 2>/dev/null \
-        | grep -oE '[0-9]+(\.[0-9]+)?' | head -1)
-fi
+[ -z "$vol" ] && [ -f "$user_conf" ]        && vol=$(read_vol "$user_conf")
+[ -z "$vol" ] && [ -f "${root}/volume.conf" ] && vol=$(read_vol "${root}/volume.conf")
 [ -z "$vol" ] && vol="1.0"
 # Mute when <= 0.
 awk "BEGIN{exit !($vol<=0)}" && exit 0

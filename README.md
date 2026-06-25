@@ -15,14 +15,20 @@ In Claude Code:
 
 Then **restart Claude Code** so the hooks register. Check it's on with `/plugin`.
 
+## Commands
+
+- `/claudes-plan:help` — overview of every sound and command
+- `/claudes-plan:volume [0.0-1.0]` — set the volume (e.g. `0.3`)
+- `/claudes-plan:volume mute` / `unmute` — toggle sound off/on
+- `/claudes-plan:volume` — show the current volume
+
 ## What plays when
 
 | Sound | Fires when |
 |---|---|
 | `commit.wav` | Claude runs `git commit` |
-| `bad_change.wav` | Claude runs `git status` |
 | `skimming_through_prs_LGTM.wav` | Claude runs a `gh pr` command |
-| `md.wav` | Claude **writes** a `.md` file |
+| `md.wav` | Claude **creates** a `.md` file |
 | `api_keys.wav` | Claude touches a `.env` file or a key pattern (`sk-…`, `API_KEY`, `AKIA…`) |
 | `mcp.wav` | An MCP server tool is called |
 | `context_window.wav` | The context window compacts (auto or `/compact`) |
@@ -44,17 +50,24 @@ If no player is found, the hooks no-op silently — nothing breaks, you just get
 
 ## Volume
 
-Master volume runs `0.0` (mute) to `1.0` (full). Two ways to set it:
+Master volume runs `0.0` (mute) to `1.0` (full). Easiest is the slash command:
 
-- **`volume.conf`** at the plugin root — edit the number; takes effect on the next
-  sound. (Lines starting with `#` are ignored.)
-- **`CLAUDESPLAN_VOLUME` env var** — overrides the file for the session. Set it in
-  Claude Code's settings `env`, or export it in your shell.
+```text
+/claudes-plan:volume 0.3
+/claudes-plan:volume mute
+```
+
+It saves to `~/.config/claudes-plan/volume.conf`, which every sound reads and which
+survives plugin updates. To override for a single session, set the
+`CLAUDESPLAN_VOLUME` env var (in Claude Code's settings `env`, or your shell):
 
 ```bash
 export CLAUDESPLAN_VOLUME=0.3   # quieter
 export CLAUDESPLAN_VOLUME=0     # mute
 ```
+
+Resolution order: `CLAUDESPLAN_VOLUME` env var → `~/.config/claudes-plan/volume.conf`
+→ bundled default → `1.0`.
 
 Per-clip volume works on `afplay` (macOS), `paplay`, and `ffplay`. `aplay` and the
 Windows PowerShell fallback have no per-clip control, so they play at system volume

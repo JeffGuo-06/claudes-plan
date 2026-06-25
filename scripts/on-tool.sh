@@ -29,7 +29,9 @@ case "$tool" in
     ;;
 
   Write)
-    case "$fp" in *.md) play md.wav ;; esac
+    # Create-only: PreToolUse runs before the write, so a not-yet-existing
+    # path means this Write is creating the .md, not overwriting one.
+    case "$fp" in *.md) [ -e "$fp" ] || play md.wav ;; esac
     if printf '%s' "$fp" | grep -Eq '\.env'; then play api_keys.wav
     elif printf '%s' "$text" | grep -Eq "$secret_re"; then play api_keys.wav
     fi

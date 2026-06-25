@@ -18,17 +18,9 @@ case "$tool" in
   Bash)
     # Match anywhere in the command so chained / multi-line scripts
     # (e.g. "cd x && git add . && git commit ...") still trigger.
-    # commit takes priority over status: a commit interrupts a still-playing
-    # status sound, and a status defers to a still-playing commit sound.
-    is_commit=""; is_status=""
-    case "$cmd" in *"git commit"*) is_commit=1 ;; esac
-    case "$cmd" in *"git status"*) is_status=1 ;; esac
-    if [ -n "$is_commit" ]; then
-      "${root}/scripts/play.sh" --stop bad_change.wav
-      play commit.wav
-    elif [ -n "$is_status" ]; then
-      "${root}/scripts/play.sh" --active commit.wav || play bad_change.wav
-    fi
+    case "$cmd" in
+      *"git commit"*) play commit.wav ;;
+    esac
     case "$cmd" in
       *"gh pr "*) play skimming_through_prs_LGTM.wav ;;
     esac

@@ -1,23 +1,60 @@
 #!/usr/bin/env bash
-# Low-level player: play a sound from the plugin's audio/ folder, async, never
-# blocking Claude. Cross-platform: tries the first available audio backend.
-# Usage: play.sh <filename.wav>
-sound="$1"
+# Sound player + lightweight priority control.
+#
+#   play.sh <file.wav>          play async, recording the player's PID
+#   play.sh --stop <file.wav>   stop that sound if it's still playing
+#   play.sh --active <file.wav> exit 0 if that sound is still playing, else 1
+#
+# PIDs are recorded per sound so a later hook can interrupt or defer to an
+# in-flight sound (used to give git commit priority over git status).
+
+mode="play"; sound="$1"
+case "$1" in
+  --stop)   mode="stop";   sound="$2" ;;
+  --active) mode="active"; sound="$2" ;;
+esac
 [ -n "$sound" ] || exit 0
 
 root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+pidx="${TMPDIR:-/tmp}/claudes-plan-pids"
+pidfile="${pidx}/${sound}.pid"
+
+# True if the recorded PID is alive AND still the audio player we launched
+# (guards against killing an unrelated process that reused the PID).
+sound_alive() {
+  [ -f "$pidfile" ] || return 1
+  read -r pid player < "$pidfile"
+  [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null || return 1
+  case "$(ps -p "$pid" -o comm= 2>/dev/null)" in *"$player"*) return 0 ;; esac
+  return 1
+}
+
+case "$mode" in
+  active)
+    sound_alive && exit 0 || exit 1 ;;
+  stop)
+    if sound_alive; then read -r pid _ < "$pidfile"; kill "$pid" 2>/dev/null; fi
+    rm -f "$pidfile"; exit 0 ;;
+esac
+
 file="${root}/audio/${sound}"
 [ -f "$file" ] || exit 0
 
-if command -v afplay >/dev/null 2>&1; then                 # macOS
-  afplay "$file" >/dev/null 2>&1 &
-elif command -v paplay >/dev/null 2>&1; then               # Linux / PulseAudio
-  paplay "$file" >/dev/null 2>&1 &
-elif command -v aplay >/dev/null 2>&1; then                # Linux / ALSA
-  aplay "$file" >/dev/null 2>&1 &
-elif command -v ffplay >/dev/null 2>&1; then               # ffmpeg
-  ffplay -nodisp -autoexit -loglevel quiet "$file" >/dev/null 2>&1 &
-elif command -v powershell.exe >/dev/null 2>&1; then       # Windows (WSL / Git Bash)
-  powershell.exe -NoProfile -c "(New-Object Media.SoundPlayer '$file').PlaySync();" >/dev/null 2>&1 &
+player=""
+if command -v afplay >/dev/null 2>&1; then
+  player="afplay"; afplay "$file" >/dev/null 2>&1 &
+elif command -v paplay >/dev/null 2>&1; then
+  player="paplay"; paplay "$file" >/dev/null 2>&1 &
+elif command -v aplay >/dev/null 2>&1; then
+  player="aplay"; aplay "$file" >/dev/null 2>&1 &
+elif command -v ffplay >/dev/null 2>&1; then
+  player="ffplay"; ffplay -nodisp -autoexit -loglevel quiet "$file" >/dev/null 2>&1 &
+elif command -v powershell.exe >/dev/null 2>&1; then
+  player="powershell.exe"; powershell.exe -NoProfile -c "(New-Object Media.SoundPlayer '$file').PlaySync();" >/dev/null 2>&1 &
+else
+  exit 0
 fi
+
+mkdir -p "$pidx" 2>/dev/null
+printf '%s %s' "$!" "$player" > "$pidfile"
 exit 0
